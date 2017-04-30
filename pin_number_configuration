@@ -1,6 +1,3 @@
-//www.elegoo.com
-//2016.09.12
-
 #include <Servo.h> //servo library
 Servo myservo; // create servo object to control servo
 int Echo = A4;  
@@ -9,9 +6,9 @@ int in1 = 9;
 int in2 = 8;
 int in3 = 7;
 int in4 = 6;
-int ENA = 10;
+int ENA = 11;
 int ENB = 5;
-int ABS = 255;
+int ABS = 100; /*This has to be at least 100, or the left side of the car won't work*/
 int rightDistance = 0,leftDistance = 0,middleDistance = 0 ;
 void _mForward()
 {
@@ -91,67 +88,6 @@ void setup()
 } 
 
 void loop() 
-{ 
-    myservo.write(90);//setservo position according to scaled value
-    delay(500); 
-    middleDistance = Distance_test();
-    #ifdef send
-    Serial.print("middleDistance=");
-    Serial.println(middleDistance);
-    #endif
-
-
-middleDistance = 100;
-
-    if(middleDistance<=20)
-    {     
-      _mStop();
-      delay(500);                         
-      myservo.write(5);          
-      delay(1000);      
-      rightDistance = Distance_test();
-
-      #ifdef send
-      Serial.print("rightDistance=");
-      Serial.println(rightDistance);
-      #endif
-
-      delay(500);
-       myservo.write(90);              
-      delay(1000);                                                  
-      myservo.write(180);              
-      delay(1000); 
-      leftDistance = Distance_test();
-
-      #ifdef send
-      Serial.print("leftDistance=");
-      Serial.println(leftDistance);
-      #endif
-
-      delay(500);
-      myservo.write(90);              
-      delay(1000);
-      if(rightDistance>leftDistance)  
-      {
-        _mright();
-        delay(180);
-       }
-       else if(rightDistance<leftDistance)
-       {
-        _mleft();
-        delay(180);
-       }
-       else if((rightDistance<=20)||(leftDistance<=20))
-       {
-        _mBack();
-        delay(180);
-       }
-       else
-       {
-        _mForward();
-       }
-    }  
-    else
+{
         _mForward();                     
 }
-
