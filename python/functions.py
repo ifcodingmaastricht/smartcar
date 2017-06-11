@@ -1,7 +1,7 @@
 from nanpy import ArduinoApi, SerialManager
 import time
 
-connection = SerialManager(device='/dev/tty.usbmodem1411')
+connection = SerialManager(device='/dev/ttyACM0')
 a = ArduinoApi(connection=connection)
 
 ENA=11
@@ -17,44 +17,47 @@ a.pinMode(IN3,a.OUTPUT)
 a.pinMode(IN4,a.OUTPUT)
 a.pinMode(ENA,a.OUTPUT)
 a.pinMode(ENB,a.OUTPUT)
-a.analogWrite(ENA,a.HIGH)  
-a.analogWrite(ENB,a.HIGH)
 
 def forward(speed,duration):				#forward
-	a.analogWrite(IN1,a.0)
-  	a.analogWrite(IN2,a.speed)    
-  	a.analogWrite(IN3,a.0)
-  	a.analogWrite(IN4,a.speed)  
+	a.analogWrite(ENA, speed)  
+	a.analogWrite(ENB, speed)
+	a.digitalWrite(IN1, a.LOW)
+  	a.digitalWrite(IN2, a.HIGH)    
+  	a.digitalWrite(IN3, a.LOW)
+  	a.digitalWrite(IN4, a.HIGH)  
   	time.sleep(duration)
-def backward(speed,duration)
-  	a.analogWrite(IN1,a.speed)
-  	a.analogWrite(IN2,a.0)    
-  	a.analogWrite(IN3,a.speed)
-  	a.analogWrite(IN4,a.0)
+
+
+def backward(speed,duration):				#forward
+	a.analogWrite(ENA, speed)  
+	a.analogWrite(ENB, speed)
+	a.digitalWrite(IN1, a.LOW)
+  	a.digitalWrite(IN2, a.HIGH)    
+  	a.digitalWrite(IN3, a.LOW)
+  	a.digitalWrite(IN4, a.HIGH)  
   	time.sleep(duration)
-def turn(angle,direction,duration)
-	if direction = 1:	
-	  	a.analogWrite(IN1,a.angle)
-	  	a.analogWrite(IN2,a.0)    
-	  	a.analogWrite(IN3,a.0)
-	  	a.analogWrite(IN4,a.angle)
+
+
+def backward(speed,duration):
+  	a.analogWrite(IN1, speed)
+  	a.analogWrite(IN2, 0)    
+  	a.analogWrite(IN3, speed)
+  	a.analogWrite(IN4, 0)
+  	time.sleep(duration)
+def turn(angle,direction,duration):
+	if direction == 1:	
+	  	a.analogWrite(IN1, angle)
+	  	a.analogWrite(IN2, 0)    
+	  	a.analogWrite(IN3, 0)
+	  	a.analogWrite(IN4, angle)
 	  	time.sleep(duration)
   	else:
-  		a.analogWrite(IN1,a.0)
-	  	a.analogWrite(IN2,a.angle)    
-	  	a.analogWrite(IN3,a.angle)
-	  	a.analogWrite(IN4,a.0)
+  		a.analogWrite(IN1, 0)
+	  	a.analogWrite(IN2, angle)    
+	  	a.analogWrite(IN3, angle)
+	  	a.analogWrite(IN4, 0)
 	  	time.sleep(duration)
 
 while True:
-	forward(250,3)
-	turn(100,1,2)
-
-
-
-
-
-
-
-
-
+	forward(0,3)
+	#turn(100,1,2)

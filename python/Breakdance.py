@@ -1,9 +1,12 @@
-# -*- coding: utf-8 -*-
 from nanpy import ArduinoApi, SerialManager
 import time
 
-connection = SerialManager(device='/dev/tty.usbmodem1411')
+connection = SerialManager(device='/dev/ttyACM0')
 a = ArduinoApi(connection=connection)
+
+class Car():
+	def __init__(self):
+
 
 ENA=10
 IN1=9
@@ -11,14 +14,6 @@ IN2=8
 ENB=5 
 IN3=7
 IN4=6
-
-#a.pinMode(13, a.OUTPUT)
-#a.digitalWrite(13, a.HIGH)
-#while True:≈
-   #a.digitalWrite(13, a.HIGH)
-   #time.sleep(0.01)
-   #a.digitalWrite(13, a.LOW)
-   #time.sleep(0.01)
 
 a.pinMode(IN1,a.OUTPUT)
 a.pinMode(IN2,a.OUTPUT) 
