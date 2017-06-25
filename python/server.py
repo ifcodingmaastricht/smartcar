@@ -23,6 +23,13 @@ def connect(sid, environ):
 def message(sid, data):
     print(data)
     car.move(25 * data["pitch"])
+    #if data["roll"] > 2:
+    #    car.turn(20)
+    #elif data["roll"] < -2:
+    #    car.turn(-20)
+    #else:
+    #    car.turn(0)
+    car.turn(25 * data["roll"])
 
 @sio.on('disconnect', namespace='/chat')
 def disconnect(sid):

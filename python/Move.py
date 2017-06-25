@@ -22,19 +22,25 @@ class Car():
             self.api.pinMode(pin, self.api.OUTPUT)
 
         self.speed = 0
+        self.angle = 0
 
     def move(self, speed=255):
-        self.speed = abs(speed)
-        self.api.analogWrite(self.PINS["LEFT_SPEED"], self.speed)
-        self.api.analogWrite(self.PINS["RIGHT_SPEED"], self.speed)
-        self.api.digitalWrite(self.PINS["IN1"], self.api.LOW if speed > 0 else self.api.HIGH) # right wheels, backwards
-        self.api.digitalWrite(self.PINS["IN2"], self.api.HIGH if speed > 0 else self.api.LOW)  # right wheels, forward
-        self.api.digitalWrite(self.PINS["IN3"], self.api.LOW if speed > 0 else self.api.HIGH) # left wheel, backwards
-        self.api.digitalWrite(self.PINS["IN4"], self.api.HIGH if speed > 0 else self.api.LOW)  # left wheel, forward
+        self.speed = speed
+	self.update()
+	
+    def update(self):
+	speed_left = abs(self.speed) + self.angle
+	speed_right = abs(self.speed) - self.angle
+        self.api.analogWrite(self.PINS["LEFT_SPEED"], max(0, speed_left))
+        self.api.analogWrite(self.PINS["RIGHT_SPEED"], max(0, speed_right))
+        self.api.digitalWrite(self.PINS["IN1"], self.api.LOW if self.speed > 0 else self.api.HIGH) # right wheels, backwards
+        self.api.digitalWrite(self.PINS["IN2"], self.api.HIGH if self.speed > 0 else self.api.LOW)  # right wheels, forward
+        self.api.digitalWrite(self.PINS["IN3"], self.api.LOW if self.speed > 0 else self.api.HIGH) # left wheel, backwards
+        self.api.digitalWrite(self.PINS["IN4"], self.api.HIGH if self.speed > 0 else self.api.LOW)  # left wheel, forward
 
     def turn(self, angle=5):
-        self.api.analogWrite(self.PINS["LEFT_SPEED"], self.speed + angle) 
-        self.api.analogWrite(self.PINS["RIGHT_SPEED"], self.speed - angle)
+        self.angle = angle
+	self.update()
 
     def backwards(self, speed=255):
         pass
