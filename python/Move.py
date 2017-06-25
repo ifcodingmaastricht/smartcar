@@ -21,46 +21,86 @@ class Car():
         for pin in self.PINS.values():
             self.api.pinMode(pin, self.api.OUTPUT)
 
-        self.speed = 0
-        self.angle = 0
+        self.left_speed_raw = 0
+        self.left_direction = 0
+        self.right_speed_raw = 0
+        self.right_direction = 0
 
-    def move(self, speed=255):
-        self.speed = speed
-	self.update()
-	
-    def update(self):
-	speed_left = abs(self.speed) + self.angle
-	speed_right = abs(self.speed) - self.angle
-        self.api.analogWrite(self.PINS["LEFT_SPEED"], max(0, speed_left))
-        self.api.analogWrite(self.PINS["RIGHT_SPEED"], max(0, speed_right))
-        self.api.digitalWrite(self.PINS["IN1"], self.api.LOW if self.speed > 0 else self.api.HIGH) # right wheels, backwards
-        self.api.digitalWrite(self.PINS["IN2"], self.api.HIGH if self.speed > 0 else self.api.LOW)  # right wheels, forward
-        self.api.digitalWrite(self.PINS["IN3"], self.api.LOW if self.speed > 0 else self.api.HIGH) # left wheel, backwards
-        self.api.digitalWrite(self.PINS["IN4"], self.api.HIGH if self.speed > 0 else self.api.LOW)  # left wheel, forward
+    def write(self):
+        self.write_speed()
+        self.write_left_direction()
+        self.write_right_direction()
 
-    def turn(self, angle=5):
-        self.angle = angle
-	self.update()
+    def write_speed(self):
+        self.api.analogWrite(self.PINS["LEFT_SPEED"], self.left_speed_raw)
+        self.api.analogWrite(self.PINS["RIGHT_SPEED"], self.right_speed_raw)
 
-    def backwards(self, speed=255):
-        pass
+    def write_left_direction(self):
+        # both pins LOW if left_direction == 0 aka. full stop
+        self.api.digitalWrite(self.PINS["IN3"], self.api.LOW if self.left_direction > 0 else self.api.HIGH)
+        self.api.digitalWrite(self.PINS["IN4"], self.api.LOW if self.left_direction < 0 else self.api.HIGH)
 
-    def left(self):
-        pass
+    def write_right_direction(self):
+        # both pins LOW if right_direction == 0 aka. full stop
+        self.api.digitalWrite(self.PINS["IN1"], self.api.LOW if self.right_direction > 0 else self.api.HIGH)
+        self.api.digitalWrite(self.PINS["IN2"], self.api.LOW if self.right_direction < 0 else self.api.HIGH)
 
-    def right(self):
-        pass    
+    # -100 <= left_speed <= 100
+    # -100 <= right_speed <= 100
+    # a value of 0 means stop
+    def move(self, left_speed, right_speed, turn=0):
+        # cmp(-123, 0) == -1
+        # cmp(0, 0)    == 0
+        # cmp(88, 0)   == 1
+        # aka it mimicks the "sign" function from other languages (and basic math)
+        self.left_direction = cmp(left_speed, 0)
+        self.right_direction = cmp(right_speed, 0)
+
+        # Because the wheels only start moving when the analog port has
+        # value 'threshold' or up. In our case it was somewhere between
+        # 80 and 90.
+        threshold = float(85)
+
+        # Make sure we don't fuck up with values outside [-100...100]
+        left_speed = min(100, max(-100, left_speed))
+        right_speed = min(100, max(-100, right_speed))
+
+        # Here we map a value [0...100] to [threshold...255]
+        self.left_speed_raw = round((float(abs(left_speed)) / 100.0) * (255.0 - threshold) + threshold)
+        self.right_speed_raw = round((float(abs(right_speed)) / 100.0) * (255.0 - threshold) + threshold)
+
+        if turn > 0:
+            self.right_speed_raw = 0
+            # self.left_speed_raw = min(255, self.left_speed_raw + turn * 4)
+        elif turn < 0:
+            self.left_speed_raw = 0
+            # self.right_speed_raw = min(255, self.right_speed_raw - turn * 4)
+
+        # write debug info
+        print "left_speed %d" % (left_speed)
+        print "right_speed %d" % (right_speed)
+        print "self.left_speed_raw %d" % (self.left_speed_raw)
+        print "self.right_speed_raw %d" % (self.right_speed_raw)
+        print "self.left_direction %d" % (self.left_direction)
+        print "self.right_direction %d" % (self.right_direction)
+        print ""
+
+        # Write values to the Bruce car
+        self.write()
+
+    def fullStop(self):
+        self.move(0,0,0)
 
 import sys
 if __name__ == "__main__":
     car = Car()
-    car.move(100)
-    time.sleep(2)
-    car.turn(20)
-    time.sleep(2)
-    car.move(-100)
-    car.turn(20)
-    time.sleep(2)
-    car.turn(0)
-    time.sleep(1.8)
-    car.move(0)
+
+    while True:
+        car.move(1,1,0)
+        time.sleep(1)
+        car.move(0,0,0)
+        time.sleep(1)
+        car.move(-1,-1,0)
+        time.sleep(1)
+        car.move(0,0,0)
+        time.sleep(1)

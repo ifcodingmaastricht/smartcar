@@ -29,7 +29,7 @@ function guid() {
     var timestamp = Date.now();
     var myId = guid();
     window.addEventListener("devicemotion", function(event){
-    if (Date.now() - timestamp > 500){
+    if (Date.now() - timestamp > 100){
     socket.emit('broadcast', {
        id: myId,
        roll: event.accelerationIncludingGravity.y,
